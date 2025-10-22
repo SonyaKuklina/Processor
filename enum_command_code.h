@@ -14,22 +14,12 @@ enum CommandCode {
     PUSHR = 33,
     POPR = 42,
     JB = 50,
+    JE,
+    JA,
     CALL = 70,
     RET = 71,
     PUSHM = 80,
     POPM = 81,
-
-};
-
-enum CommandStatus {
-
-    ON_JB = 0,
-    ON_METKA,
-    METKA_BEFORE,
-    METKA_AFTER,
-    JB_FIND_METKA,
-    JB_NOT_FIND_METKA,
-    ERROR_LABELS,
 
 };
 
