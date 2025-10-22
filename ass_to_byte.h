@@ -45,4 +45,13 @@ bool CorrectNum(char* command, long int* num_metka);
 CommandStatus FunctionJB(long int num_metka, CommandStatus status, int* current_index, int* labels,
                          type_el_code* code_ptr);
 
+bool CheckSecondStrJB(type_el_code* code_ptr, int* current_index,
+                      char* command, char* second_str,
+                      int* labels,
+                      PendingAddress *pending_add, int* count_pend);
+
+bool CheckSecondStrMetka(type_el_code* code_ptr, int* current_index,
+                         char* command, int* labels,
+                         PendingAddress *pending_add, int* count_pend);
+
 #endif

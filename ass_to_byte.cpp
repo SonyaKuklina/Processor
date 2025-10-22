@@ -4,28 +4,7 @@
 #include "ass_to_byte.h"
 #include "enum_command_code.h"
 #include "ass_common.h"
-
-/*long int CountNewStr(char* bufer) {
-
-    assert(bufer != NULL);
-
-    long int count_str = 0;
-    long long int c = Strchr(bufer,'\n');
-    char* start_bufer = bufer;
-
-    assert(start_bufer != NULL);
-
-    while (c != 0) {
-
-        count_str++;
-        start_bufer += c + 1;
-        c = Strchr(start_bufer,'\n');
-
-    }
-
-    return count_str;
-
-}*/
+#include "struct_for_file.h"
 
 void ReadAssemblerFile (type_el_code* code_ptr, int* labels) {
 
@@ -98,6 +77,7 @@ bool StringAnalysis(char* file_command_str, FILE* byte_code,
     assert(file_name        != NULL);
     assert(code_ptr         != NULL);
     assert(current_index    != NULL);
+    assert(labels           != NULL);
     assert(byte_code        != NULL);
     assert(pending_add      != NULL);
     assert(count_pend       != NULL);
@@ -134,6 +114,9 @@ bool StringAnalysis(char* file_command_str, FILE* byte_code,
 
                      return false;
 
+    } else {
+
+
     }
 
     return true;
@@ -156,6 +139,10 @@ bool GetCommand_2_Args(char* command, type_el_code element,
         *(code_ptr + *current_index) = element;
          (*current_index)++;
 
+    } else if (command[0] == ';') {
+
+         return true;
+
     } else {
 
         printf("file %s, line %d invailed command\n", file_name, file_line);
@@ -177,6 +164,9 @@ bool GetCommand_1_Args(char* command,
     assert(file_name        != NULL);
     assert(code_ptr         != NULL);
     assert(current_index    != NULL);
+    assert(labels           != NULL);
+    assert(pending_add      != NULL);
+    assert(count_pend       != NULL);
 
     if (strcmp(command, "ADD") == 0) {
 
@@ -225,29 +215,15 @@ bool GetCommand_1_Args(char* command,
 
     } else if (command[0] == ':') {
 
-        long int num_metka = 0;
-        CommandStatus status = ON_METKA;
+        if (!CheckSecondStrMetka(code_ptr, current_index,
+                                 command, labels,
+                                 pending_add, count_pend))
 
-        if (CorrectNum(command, &num_metka)) {
+                                 return false;
 
-            CommandStatus result = FunctionJB(num_metka, status, current_index, labels, code_ptr);
+    } else if (command[0] == ';') {
 
-            if (result != ERROR_LABELS) {
-
-                for (int i = 0; i < *count_pend; i++) {
-
-                    if (pending_add[i].label_num == num_metka)
-                        code_ptr[pending_add[i].code_pos] = labels[num_metka];
-
-                }
-
-            } else {
-
-                 return false;
-            }
-
-        }
-
+        return true;
 
     } else {
 
@@ -267,10 +243,12 @@ bool GetCommand_2_Args_Str(char* command, char* second_str,
                            PendingAddress *pending_add, int* count_pend) {
 
     assert(command       != NULL);
-    assert(second_str       != NULL);
+    assert(second_str    != NULL);
     assert(file_name     != NULL);
     assert(code_ptr      != NULL);
     assert(current_index != NULL);
+    assert(pending_add   != NULL);
+    assert(count_pend    != NULL);
 
     if (strcmp(command, "PUSHR") == 0) {
 
@@ -284,45 +262,68 @@ bool GetCommand_2_Args_Str(char* command, char* second_str,
 
     } else if ((strcmp(command, "JB") == 0) || (strcmp(command, "CALL") == 0)) {
 
-         CommandCode cmd = (strcmp(command, "JB") == 0) ? JB : CALL;
-        *(code_ptr + *(current_index)) = cmd;
+         if (!CheckSecondStrJB(code_ptr, current_index,
+                            command, second_str,
+                            labels,
+                            pending_add, count_pend))
+
+                            return false;
+
+    } else if (strcmp(command, "PUSHM") == 0) {
+
+        *(code_ptr + *(current_index)) = PUSHM;
          (*current_index)++;
+         if ((second_str[0] == '[') && (second_str[4] == ']')) {
 
-         if (second_str[0] == ':') {
+            char* pushm_reg = second_str + 1;
+            pushm_reg[3] = '\0';
 
-            long int num_metka = 0;
-            CommandStatus status = ON_JB;
+            if (!SyntaxErrorReg(pushm_reg)) {
 
-            if (CorrectNum(second_str, &num_metka)) {
-                if (num_metka < 0 || num_metka >= SIZE_LABELS) {
+                *(code_ptr + *current_index) = (pushm_reg[1] - 'A');
+                 (*current_index)++;
 
-                    printf("Invalid label number, expand the array labels");
-                    return false;
+            } else {
 
-                }
+                return false;
 
-                CommandStatus result = FunctionJB(num_metka, status, current_index, labels, code_ptr);
-
-                if (result == JB_NOT_FIND_METKA) {
-
-                    if (*count_pend < SIZE_PENDING) {
-
-                         pending_add[*count_pend].label_num = num_metka;
-                         pending_add[*count_pend].code_pos  = *current_index;
-                    }
-
-                    (*current_index)++;
-                    (*count_pend)++;
-
-                }
             }
-        }
 
-    } else if (strcmp(command, "CALL") == 0) {
+         } else {
 
-        *(code_ptr + *(current_index)) = JB;
+            return false;
+
+         }
+
+    } else if (strcmp(command, "POPM") == 0) {
+
+        *(code_ptr + *(current_index)) = POPM;
          (*current_index)++;
+         if ((second_str[0] == '[') && (second_str[4] == ']')) {
 
+            char* pushm_reg = second_str + 1;
+            pushm_reg[3] = '\0';
+
+            if (!SyntaxErrorReg(pushm_reg)) {
+
+                *(code_ptr + *current_index) = (pushm_reg[1] - 'A');
+                 (*current_index)++;
+
+            } else {
+
+                return false;
+
+            }
+
+         } else {
+
+            return false;
+
+         }
+
+    } else if (command[0] == ';') {
+
+        return true;
 
     } else {
 
@@ -334,7 +335,7 @@ bool GetCommand_2_Args_Str(char* command, char* second_str,
     if ((command[0] != 'J') && (!SyntaxErrorReg(second_str))) {
 
         *(code_ptr + *current_index) = (second_str[1] - 'A');
-        (*current_index)++;
+         (*current_index)++;
 
     }
 
@@ -361,9 +362,15 @@ void WriteToFile(FILE* byte_code, type_el_code* code_ptr, int current_index) {
 
 bool CorrectNum(char* command, long int* num_metka) {
 
+    assert(command   != NULL);
+    assert(num_metka != NULL);
+
     char* command_ch = command + 1;
     char* ptr_end_str1 = strlen(command) + command;
     char* ptr_end_str2 = 0;
+
+    assert(command_ch   != NULL);
+    assert(ptr_end_str1 != NULL);
 
     if (strtol(command_ch, &ptr_end_str2, 10) != 0) {
 
@@ -388,7 +395,7 @@ CommandStatus FunctionJB(long int num_metka, CommandStatus status, int* current_
                          type_el_code* code_ptr) {
 
     assert(current_index != NULL);
-    assert(code_ptr  != NULL);
+    assert(code_ptr      != NULL);
     assert(labels        != NULL);
 
     if (status == ON_METKA) {
@@ -397,7 +404,6 @@ CommandStatus FunctionJB(long int num_metka, CommandStatus status, int* current_
 
             labels[num_metka] = *current_index;
             return METKA_BEFORE;
-
 
         }  else if (labels[num_metka] == -2) {
 
@@ -408,6 +414,8 @@ CommandStatus FunctionJB(long int num_metka, CommandStatus status, int* current_
 
             printf("invalid array labels element value\n");
             return ERROR_LABELS;
+
+
         }
 
     } else {
@@ -427,9 +435,86 @@ CommandStatus FunctionJB(long int num_metka, CommandStatus status, int* current_
         } else if (labels[num_metka] == -2) {
 
              return JB_NOT_FIND_METKA;
+
         }
 
     }
+
+}
+
+bool CheckSecondStrJB(type_el_code* code_ptr, int* current_index,
+                    char* command, char* second_str,
+                    int* labels,
+                    PendingAddress *pending_add, int* count_pend) {
+
+    CommandCode cmd = (strcmp(command, "JB") == 0) ? JB : CALL;
+   *(code_ptr + *(current_index)) = cmd;
+    (*current_index)++;
+
+    if (second_str[0] == ':') {
+
+        long int num_metka = 0;
+        CommandStatus status = ON_JB;
+
+        if (CorrectNum(second_str, &num_metka)) {
+
+            if (num_metka < 0 || num_metka >= SIZE_LABELS) {
+
+                printf("Invalid label number, expand the array labels");
+                return false;
+
+            }
+
+            CommandStatus result = FunctionJB(num_metka, status, current_index, labels, code_ptr);
+
+            if (result == JB_NOT_FIND_METKA) {
+
+                if (*count_pend < SIZE_PENDING) {
+
+                    pending_add[*count_pend].label_num = num_metka;
+                    pending_add[*count_pend].code_pos  = *current_index;
+
+                }
+
+                (*current_index)++;
+                (*count_pend)++;
+
+            }
+        }
+    }
+
+    return true;
+}
+
+bool CheckSecondStrMetka(type_el_code* code_ptr, int* current_index,
+                         char* command, int* labels,
+                         PendingAddress *pending_add, int* count_pend) {
+
+    long int num_metka = 0;
+    CommandStatus status = ON_METKA;
+
+    if (CorrectNum(command, &num_metka)) {
+
+        CommandStatus result = FunctionJB(num_metka, status, current_index, labels, code_ptr);
+
+        if (result != ERROR_LABELS) {
+
+            for (int i = 0; i < *count_pend; i++) {
+
+                if (pending_add[i].label_num == num_metka)
+
+                    code_ptr[pending_add[i].code_pos] = labels[num_metka];
+
+            }
+
+        } else {
+
+            return false;
+        }
+
+    }
+
+    return true;
 
 }
 

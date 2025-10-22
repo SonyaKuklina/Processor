@@ -16,6 +16,9 @@ enum CommandCode {
     JB = 50,
     CALL = 70,
     RET = 71,
+    PUSHM = 80,
+    POPM = 81,
+
 };
 
 enum CommandStatus {
