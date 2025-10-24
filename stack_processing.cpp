@@ -352,11 +352,15 @@ ErrorType StackReturnVerify(Stack_ret* stack_ret_all) {
 
 }
 
-ErrorType PushToStack(Processor* prcs, int index) {
+ErrorType PushToStack(Processor* prcs, int* index) {
 
-      assert(prcs != NULL);
-      type_stack element = (prcs -> code[index]);
+      assert(prcs  != NULL);
+      assert(index != NULL);
+      type_stack element = (prcs -> code[*index]);
       ErrorType error = StackPush(&(prcs -> stack_all), element);
+      (*index)++;
+      (prcs -> programm_counter)++;
+
       return error;
 
 }
@@ -482,11 +486,12 @@ ErrorType OutToStack(Processor* prcs) {
 
 }
 
-ErrorType PushRToStack(Processor* prcs, int index) {
+ErrorType PushRToStack(Processor* prcs, int* index) {
 
-    assert(prcs != NULL);
+    assert(prcs  != NULL);
+    assert(index != NULL);
 
-    int index_reg = (int)(prcs -> code[index]);
+    int index_reg = (int)(prcs -> code[*index]);
 
     if (index_reg < 0 || index_reg >= REGS_SIZE) {
         return INVAILED_REG;
@@ -494,16 +499,19 @@ ErrorType PushRToStack(Processor* prcs, int index) {
 
     type_stack reg_el = (prcs -> regs[index_reg]);
     ErrorType error = StackPush(&(prcs -> stack_all), reg_el);
+    (*index)++;
+    (prcs -> programm_counter)++;
     return error;
 
 }
 
-ErrorType PopRToStack(Processor* prcs, int index) {
+ErrorType PopRToStack(Processor* prcs, int* index) {
 
-    assert(prcs != NULL);
+    assert(prcs  != NULL);
+    assert(index != NULL);
 
     type_stack element = 0;
-    int index_reg = (int)(prcs -> code[index]);
+    int index_reg = (int)(prcs -> code[*index]);
 
     if (index_reg < 0 || index_reg >= REGS_SIZE) {
         return INVAILED_REG;
@@ -512,6 +520,8 @@ ErrorType PopRToStack(Processor* prcs, int index) {
     ErrorType error = StackPop(&(prcs -> stack_all), &element);
     ERROR;
     (prcs -> regs[index_reg]) = element;
+    (*index)++;
+    (prcs -> programm_counter)++;
     return error;
 
 }
@@ -539,6 +549,7 @@ ErrorType JBToStack(Processor* prcs, int* index) {
 
         *index += 1;
     }
+    (prcs -> programm_counter) = *index;
 
     return error;
 
@@ -567,6 +578,7 @@ ErrorType JEToStack(Processor* prcs, int* index) {
 
          *index += 1;
     }
+    (prcs -> programm_counter) = *index;
 
     return error;
 
@@ -595,6 +607,7 @@ ErrorType JAToStack(Processor* prcs, int* index) {
 
         *index += 1;
     }
+    (prcs -> programm_counter) = *index;
 
     return error;
 
@@ -612,6 +625,7 @@ ErrorType CallToStack(Processor* prcs, int* index) {
 
     int jump_add = (int)(prcs -> code[*index]);
     *index = jump_add;
+    (prcs -> programm_counter) = *index;
 
     return error;
 
@@ -628,16 +642,18 @@ ErrorType RetToStack(Processor* prcs, int* index) {
     ERROR;
 
     *index = element_ret;
+    (prcs -> programm_counter) = *index;
 
     return error;
 
 }
 
-ErrorType PushmToStack(Processor* prcs, int index) {
+ErrorType PushmToStack(Processor* prcs, int* index) {
 
-    assert(prcs != NULL);
+    assert(prcs  != NULL);
+    assert(index != NULL);
 
-    int index_reg = (int)(prcs -> code[index]);
+    int index_reg = (int)(prcs -> code[*index]);
 
     if (index_reg < 0 || index_reg >= REGS_SIZE) {
         return INVAILED_REG;
@@ -651,18 +667,21 @@ ErrorType PushmToStack(Processor* prcs, int index) {
 
     int ram_el = (prcs -> RAM[(int)(prcs -> regs[index_reg])]);
     ErrorType error = StackPush(&(prcs -> stack_all), (type_stack)ram_el);
+    (*index)++;
+    (prcs -> programm_counter)++;
     return error;
 
 }
 
-ErrorType PopmToStack(Processor* prcs, int index) {
+ErrorType PopmToStack(Processor* prcs, int* index) {
 
-    assert(prcs != NULL);
+    assert(prcs  != NULL);
+    assert(index != NULL);
 
     type_stack element = 0;
     ErrorType error = StackPop(&(prcs -> stack_all), &element);
 
-    int index_reg = (int)(prcs -> code[index]);
+    int index_reg = (int)(prcs -> code[*index]);
 
     if ((index_reg < 0) || (index_reg >= REGS_SIZE)) {
         return INVAILED_REG;
@@ -675,6 +694,10 @@ ErrorType PopmToStack(Processor* prcs, int index) {
     }
 
     (prcs -> RAM[(int)(prcs -> regs[index_reg])]) = (int)element;
+
+    (*index)++;
+    (prcs -> programm_counter)++;
+
     return error;
 
 }

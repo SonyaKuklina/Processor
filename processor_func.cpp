@@ -121,9 +121,7 @@ ErrorType ExecutionPrCommand(Processor* prcs, int code_size) {
 
          switch (command_now) {
 
-         case PUSH:  error = PushToStack(prcs, index);
-                     index++;
-                     (prcs -> programm_counter)++;
+         case PUSH:  error = PushToStack(prcs, &index);
                      break;
 
          case ADD:   error = AddToStack(prcs);
@@ -147,44 +145,31 @@ ErrorType ExecutionPrCommand(Processor* prcs, int code_size) {
          case OUT:   error = OutToStack(prcs);
                      break;
 
-         case PUSHR: error = PushRToStack(prcs, index);
-                     index++;
-                     (prcs -> programm_counter)++;
+         case PUSHR: error = PushRToStack(prcs, &index);
                      break;
 
-         case POPR:  error = PopRToStack(prcs, index);
-                     index++;
-                     (prcs -> programm_counter)++;
+         case POPR:  error = PopRToStack(prcs, &index);
                      break;
 
          case JB:    error = JBToStack(prcs, &index);
-                     (prcs -> programm_counter) = index;
                      break;
 
          case JE:    error = JEToStack(prcs, &index);
-                     (prcs -> programm_counter) = index;
                      break;
 
          case JA:    error = JAToStack(prcs, &index);
-                     (prcs -> programm_counter) = index;
                      break;
 
          case CALL:  error = CallToStack(prcs, &index);
-                     (prcs -> programm_counter) = index;
                      break;
 
          case RET:   error = RetToStack(prcs, &index);
-                     (prcs -> programm_counter) = index;
                      break;
 
-         case PUSHM: error = PushmToStack(prcs, index);
-                     index++;
-                     (prcs -> programm_counter)++;
+         case PUSHM: error = PushmToStack(prcs, &index);
                      break;
 
-         case POPM:  error = PopmToStack(prcs, index);
-                     index++;
-                     (prcs -> programm_counter)++;
+         case POPM:  error = PopmToStack(prcs, &index);
                      break;
 
          case HLT:   not_hlt = false;

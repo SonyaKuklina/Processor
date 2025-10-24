@@ -40,7 +40,7 @@ ErrorType StackVerify(Stack_t* stack_all);
 
 ErrorType StackReturnVerify(Stack_ret* stack_ret_all);
 
-ErrorType PushToStack(Processor* prcs, int index);
+ErrorType PushToStack(Processor* prcs, int* index);
 
 ErrorType AddToStack(Processor* prcs);
 
@@ -58,9 +58,9 @@ ErrorType OutToStack(Processor* prcs);
 
 ErrorType HltToStack(Processor* prcs);
 
-ErrorType PushRToStack(Processor* prcs, int index);
+ErrorType PushRToStack(Processor* prcs, int* index);
 
-ErrorType PopRToStack(Processor* prcs, int index);
+ErrorType PopRToStack(Processor* prcs, int* index);
 
 ErrorType JBToStack(Processor* prcs, int* index);
 
@@ -72,8 +72,8 @@ ErrorType CallToStack(Processor* prcs, int* index);
 
 ErrorType RetToStack(Processor* prcs, int* index);
 
-ErrorType PushmToStack(Processor* prcs, int index);
+ErrorType PushmToStack(Processor* prcs, int* index);
 
-ErrorType PopmToStack(Processor* prcs, int index);
+ErrorType PopmToStack(Processor* prcs, int* index);
 
 #endif

@@ -40,11 +40,11 @@ void StackReturnInformation(Stack_ret* stack_ret_all, const char* file, int line
     printf("    stack_return [%p]       \n", (stack_ret_all -> stack_return));
     printf("    {               \n");
     for (size_t index = 0; index < (stack_ret_all -> size_stack_return); index++) {
-        printf("        *[%lld] = %g\n", index, stack_ret_all -> stack_return[index]);
+        printf("        *[%lld] = %d\n", index, stack_ret_all -> stack_return[index]);
     }
     for (size_t index = (stack_ret_all -> size_stack_return);
                     index < (stack_ret_all -> capacity_stack_return); index++) {
-        printf("         [%lld] = %g\n", index, stack_ret_all -> stack_return[index]);
+        printf("         [%lld] = %d\n", index, stack_ret_all -> stack_return[index]);
     }
     printf("    }             \n");
     printf("}\n");

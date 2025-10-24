@@ -3,7 +3,6 @@
 
 #include "struct_processor.h"
 
-
 ErrorType ProcessorInit(Processor* prcs, size_t capacity, size_t capacity_ret, int code_size);
 
 ErrorType ProcessorVerify(Processor* prcs);
